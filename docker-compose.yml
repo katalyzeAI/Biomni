@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  biomni:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: biomni:e1
+    container_name: biomni-e1
+
+    # Keep container running
+    stdin_open: true
+    tty: true
+
+    # Volume mounts
+    volumes:
+      # Mount the E1 environment data (persists conda env across rebuilds)
+      - biomni_conda:/opt/conda/envs/biomni_e1
+
+      # Mount CLI tools directory (persists compiled binaries)
+      - biomni_tools:/app/biomni_tools
+
+      # Mount local data directory for input/output files
+      - ./data:/app/data
+
+      # Mount notebooks directory
+      - ./notebooks:/app/notebooks
+
+      # Mount source code (for development - changes reflect immediately)
+      - ./biomni:/app/biomni
+
+      # Optional: Mount your own datasets
+      # - /path/to/your/datasets:/app/datasets
+
+    # Environment variables
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      # Add your API keys here or use .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+
+    # Resource limits (adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          memory: 32G
+        reservations:
+          memory: 8G
+
+    # Port mappings
+    ports:
+      # Jupyter Notebook
+      - "8888:8888"
+      # Gradio UI
+      - "7860:7860"
+
+    # Working directory
+    working_dir: /app
+
+    # Default command (can be overridden)
+    command: bash
+
+# Named volumes for persistence
+volumes:
+  biomni_conda:
+    driver: local
+  biomni_tools:
+    driver: local
