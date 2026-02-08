@@ -98,7 +98,7 @@ resource "aws_route_table_association" "private" {
 resource "aws_security_group" "alb" {
   name_prefix = "${local.name_prefix}-alb-"
   vpc_id      = aws_vpc.main.id
-  description = "ALB security group — allows inbound HTTP/HTTPS"
+  description = "ALB security group - allows inbound HTTP/HTTPS"
 
   ingress {
     description = "HTTPS"
@@ -131,7 +131,7 @@ resource "aws_security_group" "alb" {
 resource "aws_security_group" "ecs" {
   name_prefix = "${local.name_prefix}-ecs-"
   vpc_id      = aws_vpc.main.id
-  description = "ECS tasks — allows inbound from ALB only"
+  description = "ECS tasks - allows inbound from ALB only"
 
   ingress {
     description     = "Gradio from ALB"

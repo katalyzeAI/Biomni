@@ -20,7 +20,9 @@ def start_api(agent_kwargs: dict):
     import uvicorn
 
     os.environ["BIOMNI_AGENT_KWARGS"] = json.dumps(agent_kwargs)
-    uvicorn.run("scripts.api_server:app", host="0.0.0.0", port=8000)
+    # Add scripts/ to sys.path so uvicorn can import api_server directly
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+    uvicorn.run("api_server:app", host="0.0.0.0", port=8000)
 
 
 def main():

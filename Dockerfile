@@ -3,6 +3,15 @@
 #
 # Build: docker build -t biomni:e1 .
 # Run:   docker-compose up -d
+#
+# Layer caching strategy (top = changes least, bottom = changes most):
+#   1. System packages (rarely change)
+#   2. Conda base environment (environment.yml)
+#   3. Conda bio packages (bio_env.yml)
+#   4. Conda R packages (r_packages.yml)
+#   5. R CRAN packages + CLI tools
+#   6. Python package install (pyproject.toml — dependencies only)
+#   7. Application code (biomni/, scripts/ — changes most often)
 
 FROM continuumio/miniconda3:24.11.1-0
 
@@ -14,7 +23,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
-# Install system dependencies required for bioinformatics tools
+# ── Layer 1: System packages (rarely changes) ───────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
@@ -53,7 +62,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set up working directory
 WORKDIR /app
 
-# Copy environment files first (for layer caching)
+# Install mamba for faster dependency resolution
+RUN conda install -n base -c conda-forge mamba && \
+    conda clean -afy
+
+# ── Layer 2-3: Conda environments (change when yml files change) ─
 COPY biomni_env/environment.yml /app/biomni_env/environment.yml
 COPY biomni_env/bio_env.yml /app/biomni_env/bio_env.yml
 COPY biomni_env/r_packages.yml /app/biomni_env/r_packages.yml
@@ -61,49 +74,53 @@ COPY biomni_env/install_r_packages.R /app/biomni_env/install_r_packages.R
 COPY biomni_env/cli_tools_config.json /app/biomni_env/cli_tools_config.json
 COPY biomni_env/install_cli_tools.sh /app/biomni_env/install_cli_tools.sh
 
-# Create the base conda environment
-RUN conda env create -n biomni_e1 -f /app/biomni_env/environment.yml && \
+RUN mamba env create -n biomni_e1 -f /app/biomni_env/environment.yml && \
     conda clean -afy
 
-# Initialize conda for bash
 RUN conda init bash
 
-# Install bioinformatics packages into the environment
-# Note: This is done separately for better layer caching
-RUN conda env update -n biomni_e1 -f /app/biomni_env/bio_env.yml && \
+RUN mamba env update -n biomni_e1 -f /app/biomni_env/bio_env.yml && \
     conda clean -afy
 
-# Install R and R packages
-RUN conda env update -n biomni_e1 -f /app/biomni_env/r_packages.yml && \
+# ── Layer 4: R packages ─────────────────────────────────────
+RUN mamba env update -n biomni_e1 -f /app/biomni_env/r_packages.yml && \
     conda clean -afy
 
-# Activate environment and install additional R packages via R's package manager
 SHELL ["/bin/bash", "-c"]
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     conda activate biomni_e1 && \
     Rscript /app/biomni_env/install_r_packages.R || true
 
-# Set up CLI tools directory
+# ── Layer 5: CLI bioinformatics tools ────────────────────────
 ENV BIOMNI_TOOLS_DIR=/app/biomni_tools
 ENV BIOMNI_AUTO_INSTALL=1
 ENV NON_INTERACTIVE=1
 
-# Install CLI bioinformatics tools
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     conda activate biomni_e1 && \
     cd /app/biomni_env && \
     bash install_cli_tools.sh --auto || true
 
-# Add CLI tools to PATH
 ENV PATH="/app/biomni_tools/bin:${PATH}"
 
-# Copy the rest of the application
-COPY . /app/
+# ── Layer 6: Python package dependencies (pyproject.toml) ────
+# Copy only dependency metadata first so `pip install` is cached
+# unless pyproject.toml itself changes.
+COPY pyproject.toml /app/pyproject.toml
+COPY biomni/version.py /app/biomni/version.py
+COPY biomni/__init__.py /app/biomni/__init__.py
 
-# Install FastAPI + uvicorn for the REST API
 RUN source /opt/conda/etc/profile.d/conda.sh && \
     conda activate biomni_e1 && \
-    pip install --no-cache-dir fastapi uvicorn[standard]
+    pip install --no-cache-dir -e ".[gradio]" && \
+    pip install --no-cache-dir fastapi uvicorn[standard] && \
+    pip install --force-reinstall --no-cache-dir "numpy==1.26.4" && \
+    pip install --force-reinstall --no-cache-dir --no-deps "pandas==2.2.3"
+
+# ── Layer 7: Application code (changes most often) ──────────
+# This layer rebuilds on any code change, but all heavy installs
+# above are cached.
+COPY . /app/
 
 # Create entrypoint script
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
