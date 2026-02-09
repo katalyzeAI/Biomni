@@ -226,6 +226,12 @@ data/ddinter_raw/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
 # VSCode
 /.vscode
 

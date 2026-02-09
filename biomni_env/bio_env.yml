@@ -15,6 +15,14 @@ dependencies:
   - gseapy
   - mageck
   - plannotate
+  # Packages moved from pip to conda due to C extension build issues
+  - openmm
+  - pystan>=3.0
+  - msprime
+  - tskit
+  - cyvcf2
+  - pysam
+  - pybedtools
   - pip:
     - scanpy
     - biopython
@@ -43,12 +51,8 @@ dependencies:
     - harmony-pytorch
     - pyliftover
     - pytdc==0.4.0
-    - pysam
     - pyfaidx
     - pyranges
-    - pybedtools
-    - openmm
-    - pystan
     - igraph
     - pyscenic
     - cooler
@@ -62,9 +66,6 @@ dependencies:
     - reportlab
     #- flowkit
     - hmmlearn
-    - msprime
-    - tskit
-    - cyvcf2
     - pykalman
     - community
     - fanc
