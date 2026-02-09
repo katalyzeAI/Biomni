@@ -8,8 +8,13 @@ data_lake_snapshot_id = "snap-027e391c702b0a6cd"
 # API keys — pass via CLI or environment to avoid committing secrets:
 #   terraform apply -var="anthropic_api_key=sk-ant-..."
 #   export TF_VAR_anthropic_api_key="sk-ant-..."
-anthropic_api_key = ""
-openai_api_key    = ""
+# NOTE: Do NOT set defaults here — they override TF_VAR_ env vars.
+
+# Tailscale auth key for VPN access. Generate at:
+#   https://login.tailscale.com/admin/settings/keys
+# Use a reusable, ephemeral key. Pass via env to avoid committing:
+#   export TF_VAR_tailscale_auth_key="tskey-auth-..."
+# NOTE: Do NOT set a default here — it overrides TF_VAR_ env vars.
 
 # ─── Optional overrides ────────────────────────────────────
 # aws_region            = "us-east-1"

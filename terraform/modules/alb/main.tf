@@ -7,10 +7,10 @@ locals {
 
 resource "aws_lb" "main" {
   name               = "${local.name_prefix}-alb"
-  internal           = false
+  internal           = var.internal
   load_balancer_type = "application"
   security_groups    = [var.alb_security_group_id]
-  subnets            = var.public_subnet_ids
+  subnets            = var.subnet_ids
 
   # Critical: Gradio uses WebSockets for streaming. Default 60s would
   # kill long-running agent tasks. Set to 1 hour.

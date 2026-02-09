@@ -256,11 +256,11 @@ resource "aws_ecs_service" "biomni" {
     name = "data-lake"
 
     managed_ebs_volume {
-      role_arn        = aws_iam_role.ebs_infrastructure.arn
-      snapshot_id     = var.data_lake_snapshot_id
-      volume_type     = "gp3"
-      size_in_gb      = var.data_lake_size_gib
-      encrypted       = true
+      role_arn         = aws_iam_role.ebs_infrastructure.arn
+      snapshot_id      = var.data_lake_snapshot_id
+      volume_type      = "gp3"
+      size_in_gb       = var.data_lake_size_gib
+      encrypted        = true
       file_system_type = "ext4"
     }
   }

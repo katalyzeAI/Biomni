@@ -10,8 +10,15 @@ variable "vpc_id" {
   type = string
 }
 
-variable "public_subnet_ids" {
-  type = list(string)
+variable "subnet_ids" {
+  description = "Subnets for the ALB (private when internal, public when internet-facing)"
+  type        = list(string)
+}
+
+variable "internal" {
+  description = "Whether the ALB is internal (true) or internet-facing (false)"
+  type        = bool
+  default     = true
 }
 
 variable "alb_security_group_id" {

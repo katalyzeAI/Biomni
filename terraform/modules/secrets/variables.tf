@@ -16,3 +16,9 @@ variable "openai_api_key" {
   sensitive = true
   default   = ""
 }
+
+variable "tailscale_auth_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}

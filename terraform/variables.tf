@@ -103,12 +103,22 @@ variable "biomni_timeout_seconds" {
   default     = 600
 }
 
+# --- Tailscale VPN ---
+
+variable "tailscale_auth_key" {
+  description = "Tailscale auth key for the subnet router (https://login.tailscale.com/admin/settings/keys)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 # --- Secrets ---
 
 variable "anthropic_api_key" {
   description = "Anthropic API key (stored in Secrets Manager)"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "openai_api_key" {

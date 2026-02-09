@@ -21,10 +21,11 @@ module "ecr" {
 module "secrets" {
   source = "./modules/secrets"
 
-  project_name      = var.project_name
-  environment       = var.environment
-  anthropic_api_key = var.anthropic_api_key
-  openai_api_key    = var.openai_api_key
+  project_name       = var.project_name
+  environment        = var.environment
+  anthropic_api_key  = var.anthropic_api_key
+  openai_api_key     = var.openai_api_key
+  tailscale_auth_key = var.tailscale_auth_key
 }
 
 module "alb" {
@@ -33,9 +34,22 @@ module "alb" {
   project_name          = var.project_name
   environment           = var.environment
   vpc_id                = module.networking.vpc_id
-  public_subnet_ids     = module.networking.public_subnet_ids
+  subnet_ids            = module.networking.private_subnet_ids
+  internal              = true
   alb_security_group_id = module.networking.alb_security_group_id
   certificate_arn       = var.certificate_arn
+}
+
+module "tailscale" {
+  source = "./modules/tailscale"
+
+  project_name           = var.project_name
+  environment            = var.environment
+  vpc_id                 = module.networking.vpc_id
+  vpc_cidr               = var.vpc_cidr
+  aws_region             = var.aws_region
+  subnet_id              = module.networking.public_subnet_ids[0]
+  tailscale_auth_key_arn = module.secrets.tailscale_auth_key_arn
 }
 
 module "ecs" {

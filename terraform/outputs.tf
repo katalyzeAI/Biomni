@@ -1,5 +1,5 @@
 output "alb_dns_name" {
-  description = "ALB DNS name — access Gradio at http://<dns> and API at http://<dns>/api/"
+  description = "Internal ALB DNS — accessible via Tailscale VPN only"
   value       = module.alb.alb_dns_name
 }
 
@@ -21,4 +21,14 @@ output "ecs_service_name" {
 output "cloudwatch_log_group" {
   description = "CloudWatch log group for ECS task logs"
   value       = module.ecs.log_group_name
+}
+
+output "tailscale_instance_id" {
+  description = "Tailscale subnet router EC2 instance ID (use SSM to connect)"
+  value       = module.tailscale.instance_id
+}
+
+output "tailscale_private_ip" {
+  description = "Private IP of the Tailscale subnet router"
+  value       = module.tailscale.private_ip
 }

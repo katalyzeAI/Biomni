@@ -20,7 +20,7 @@ resource "aws_internet_gateway" "main" {
   tags   = { Name = "${local.name_prefix}-igw" }
 }
 
-# ──── Public Subnets (ALB) ───────────────────────────────────
+# ──── Public Subnets (NAT Gateway, Tailscale router) ─────────
 
 resource "aws_subnet" "public" {
   count                   = local.az_count
@@ -98,22 +98,22 @@ resource "aws_route_table_association" "private" {
 resource "aws_security_group" "alb" {
   name_prefix = "${local.name_prefix}-alb-"
   vpc_id      = aws_vpc.main.id
-  description = "ALB security group - allows inbound HTTP/HTTPS"
+  description = "ALB security group - allows inbound from VPC only (Tailscale)"
 
   ingress {
-    description = "HTTPS"
+    description = "HTTPS from VPC"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   ingress {
-    description = "HTTP (redirect to HTTPS)"
+    description = "HTTP from VPC"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   egress {
