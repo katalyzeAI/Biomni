@@ -4,7 +4,7 @@
 # This script:
 #   1. Launches a temporary EC2 instance
 #   2. Creates and attaches a 15 GiB gp3 EBS volume
-#   3. Downloads the data lake (78 files) and benchmark dataset from S3
+#   3. Downloads the data lake (76 files) and benchmark dataset from S3
 #   4. Creates a snapshot tagged "biomni-data-lake-v1"
 #   5. Cleans up (terminates instance, deletes volume)
 #
@@ -227,7 +227,7 @@ echo "==> Creating snapshot..."
 SNAPSHOT_ID=$(aws ec2 create-snapshot \
     --region "$REGION" \
     --volume-id "$VOLUME_ID" \
-    --description "Biomni data lake — 78 files + benchmark" \
+    --description "Biomni data lake — 76 files + benchmark" \
     --tag-specifications "ResourceType=snapshot,Tags=[{Key=Name,Value=$SNAPSHOT_TAG}]" \
     --query 'SnapshotId' \
     --output text)

@@ -54,6 +54,8 @@ services:
       - "8888:8888"
       # Gradio UI
       - "7860:7860"
+      # FastAPI REST API
+      - "8000:8000"
 
     # Working directory
     working_dir: /app

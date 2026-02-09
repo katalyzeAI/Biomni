@@ -70,10 +70,28 @@ async def stream(req: InvokeRequest):
     async def event_generator():
         try:
             async with _agent_lock:
-                for step in await asyncio.to_thread(
-                    lambda: list(agent.go_stream(req.prompt))
-                ):
-                    yield f"data: {json.dumps(step)}\n\n"
+                q: asyncio.Queue = asyncio.Queue()
+                _sentinel = object()
+                loop = asyncio.get_running_loop()
+
+                def _produce():
+                    try:
+                        for step in agent.go_stream(req.prompt):
+                            asyncio.run_coroutine_threadsafe(q.put(step), loop).result()
+                    except Exception as e:
+                        asyncio.run_coroutine_threadsafe(q.put(e), loop).result()
+                    finally:
+                        asyncio.run_coroutine_threadsafe(q.put(_sentinel), loop).result()
+
+                loop.run_in_executor(None, _produce)
+
+                while True:
+                    item = await q.get()
+                    if item is _sentinel:
+                        break
+                    if isinstance(item, Exception):
+                        raise item
+                    yield f"data: {json.dumps(item)}\n\n"
             yield "data: [DONE]\n\n"
         except Exception as exc:
             yield f"data: {json.dumps({'error': str(exc)})}\n\n"

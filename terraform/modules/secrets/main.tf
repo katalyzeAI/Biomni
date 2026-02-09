@@ -8,7 +8,7 @@ resource "aws_secretsmanager_secret" "anthropic_api_key" {
 
 resource "aws_secretsmanager_secret_version" "anthropic_api_key" {
   secret_id     = aws_secretsmanager_secret.anthropic_api_key.id
-  secret_string = coalesce(var.anthropic_api_key, "REPLACE_ME")
+  secret_string = var.anthropic_api_key != "" ? var.anthropic_api_key : "REPLACE_ME"
 
   # Once set, manage the secret value via AWS console/CLI — not Terraform
   lifecycle { ignore_changes = [secret_string] }
@@ -24,7 +24,7 @@ resource "aws_secretsmanager_secret" "tailscale_auth_key" {
 
 resource "aws_secretsmanager_secret_version" "tailscale_auth_key" {
   secret_id     = aws_secretsmanager_secret.tailscale_auth_key.id
-  secret_string = coalesce(var.tailscale_auth_key, "REPLACE_ME")
+  secret_string = var.tailscale_auth_key != "" ? var.tailscale_auth_key : "REPLACE_ME"
 
   lifecycle { ignore_changes = [secret_string] }
 }
@@ -39,7 +39,7 @@ resource "aws_secretsmanager_secret" "openai_api_key" {
 
 resource "aws_secretsmanager_secret_version" "openai_api_key" {
   secret_id     = aws_secretsmanager_secret.openai_api_key.id
-  secret_string = coalesce(var.openai_api_key, "REPLACE_ME")
+  secret_string = var.openai_api_key != "" ? var.openai_api_key : "REPLACE_ME"
 
   lifecycle { ignore_changes = [secret_string] }
 }

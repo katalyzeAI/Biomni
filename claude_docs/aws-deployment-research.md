@@ -17,7 +17,7 @@
 **Location:** `biomni/agent/a1.py:155-194`
 
 The `A1.__init__` constructor has a `expected_data_lake_files` parameter:
-- `None` (default): downloads all 78 files from `https://biomni-release.s3.amazonaws.com/data_lake/` + benchmark.zip
+- `None` (default): downloads all 76 files from `https://biomni-release.s3.amazonaws.com/data_lake/` + benchmark.zip
 - Any non-None value (e.g., `[]`): **skips all downloads** (line 163)
 
 After download/skip, `self.path` is set to `{path}/biomni_data` (line 194).
@@ -26,7 +26,7 @@ After download/skip, `self.path` is set to `{path}/biomni_data` (line 194).
 ```
 {BIOMNI_DATA_PATH}/
 └── biomni_data/
-    ├── data_lake/       # 78 files (parquet, csv, pkl, json, obo, txt, tsv)
+    ├── data_lake/       # 76 files (parquet, csv, pkl, json, obo, txt, tsv)
     └── benchmark/
         └── hle/         # Presence of this dir = benchmark is complete (line 178)
 ```
@@ -109,7 +109,7 @@ For a 15 GiB read-only data lake, gp3 is the right choice (cheapest, adequate IO
 - Fixed costs remain: $37 + $28 + $3 + $0.75 + $0.80 = $70
 - **Total: ~$191/month**
 
-## Data Lake File Inventory (78 files)
+## Data Lake File Inventory (76 files)
 
 Source: `biomni/env_desc.py:2-79`
 
